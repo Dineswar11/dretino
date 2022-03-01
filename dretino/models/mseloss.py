@@ -55,7 +55,8 @@ def mse_loss(logits, y):
     preds : torch.tensor
     y : torch.tesnor
     """
-    y = torch.argmax(y, dim=-1)
+    y = torch.argmax(y,dim=-1)
+    y = torch.unsqueeze(y, 1).to(torch.float32)
     loss = nn.MSELoss()(logits, y)
     predictions = logits.data
     predictions[predictions < 0.5] = 0
@@ -64,4 +65,5 @@ def mse_loss(logits, y):
     predictions[(predictions >= 2.5) & (predictions < 3.5)] = 3
     predictions[(predictions >= 3.5) & (predictions < 1000000000000)] = 4
     preds = predictions.long().view(-1)
+    y = y.to(torch.int8).view(-1)
     return loss, preds, y

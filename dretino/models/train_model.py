@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytorch_lightning as pl
+
 from dretino.models.coralloss import ModelCORAL, cal_coral_loss
 from dretino.models.cornloss import ModelCORN, cal_corn_loss
 from dretino.models.crossentropy import ModelCE, ce_loss
@@ -10,8 +11,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger, WandbLogger, TensorBoardLogger
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torchmetrics import Accuracy, F1Score
-from torchmetrics import CohenKappa
+from torchmetrics import Accuracy, F1Score, CohenKappa
 
 
 class Model(pl.LightningModule):

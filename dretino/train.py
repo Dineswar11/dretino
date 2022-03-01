@@ -38,7 +38,7 @@ if __name__ == "__main__":
             # A.Affine(shear=30, rotate=0, p=0.2),
             A.Normalize(
                 mean=(0.5237, 0.2542, 0.0853),
-                std =(0.2649, 0.1497, 0.0876),
+                std=(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             A.Resize(height=224, width=224),
             A.Normalize(
                 mean=(0.5237, 0.2542, 0.0853),
-                std =(0.2649, 0.1497, 0.0876),
+                std=(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -62,7 +62,7 @@ if __name__ == "__main__":
             A.Resize(height=224, width=224),
             A.Normalize(
                 mean=(0.5237, 0.2542, 0.0853),
-                std =(0.2649, 0.1497, 0.0876),
+                std=(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         num_layers=2,
         dropout=0.2,
         lr=3e-4,
-        loss='ce',
+        loss='mse',
         epochs=5,
         gpus=0,
         project='DRD',

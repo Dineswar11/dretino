@@ -93,7 +93,7 @@ class DRDataModule(pl.LightningDataModule):
                           batch_size=self.batch_size,
                           sampler=self.sampler,
                           num_workers=self.num_workers,
-                          shuffle=True)
+                          shuffle=False)
 
     def val_dataloader(self):
         return DataLoader(self.val_data,
