@@ -9,56 +9,22 @@ from albumentations.pytorch import ToTensorV2
 from torch.utils.data import Dataset, WeightedRandomSampler
 from tqdm import tqdm
 
-train_transforms = A.Compose(
-    [
-        A.Resize(width=250, height=250),
-        A.RandomCrop(height=224, width=224),
-        A.HorizontalFlip(p=0.5),
-        A.VerticalFlip(p=0.5),
-        A.RandomRotate90(p=0.5),
-        A.Blur(p=0.3),
-        A.CLAHE(p=0.3),
-        A.ColorJitter(p=0.3),
-        A.Affine(shear=30, rotate=0, p=0.2),
-        A.Normalize(
-            mean=[0.3740, 0.4216, 0.5143],
-            std=[0.8616, 1.1727, 1.4168],
-            max_pixel_value=255.0,
-        ),
-        ToTensorV2(),
-    ]
-)
-
-val_transforms = A.Compose(
-    [
-        A.Resize(height=224, width=224),
-        A.Normalize(
-            mean=[0.3740, 0.4216, 0.5143],
-            std=[0.8616, 1.1727, 1.4168],
-            max_pixel_value=255.0,
-        ),
-        ToTensorV2(),
-    ]
-)
-
-test_transforms = A.Compose(
-    [
-        A.Resize(height=224, width=224),
-        A.Normalize(
-            mean=[0.3740, 0.4216, 0.5143],
-            std=[0.8616, 1.1727, 1.4168],
-            max_pixel_value=255.0,
-        ),
-        ToTensorV2(),
-    ]
-)
-
 
 class CustomDataset(Dataset):
     def __init__(self, dfx, image_dir, transform=None):
+        """Create a pytorch dataser
+
+        Parameters
+        ----------
+        dfx : (DataFrame), DataFrame containing image name and retinopathy grade
+        image_dir : (str), path of the image directory
+        transform : (Albumentations, optional), Transformations. Defaults to None.
+        """
+        super().__init__()
         self.dfx = dfx
-        self.image_ids = self.dfx['Image name'].values
-        self.targets = self.dfx['Retinopathy grade'].values
+        self.image_ids = self.dfx.iloc[:,0].values
+        self.targets = self.dfx.iloc[:,1].values
+        self.num_classes = self.dfx.iloc[:,1].nunique()
         self.image_dir = image_dir
         self.transform = transform
 
@@ -68,7 +34,7 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         img_name = self.image_ids[idx]
         index = torch.tensor(self.targets[idx])
-        target = F.one_hot(index, num_classes=5)
+        target = F.one_hot(index, num_classes=self.num_classes)
 
         img = np.array(Image.open(os.path.join(self.image_dir, img_name + '.jpg')).convert("RGB"))
         if self.transform:
@@ -77,6 +43,16 @@ class CustomDataset(Dataset):
 
 
 def get_sampler(train_data):
+    """Create a Sampler to Balance and imbalanced dataset while loading
+
+    Parameters
+    ----------
+    train_data : (DataLoader), Train DataLoader to get the sampler
+
+    Returns
+    -------
+    WeightedRandomSampler : Sampler 
+    """
     targets = []
     for _, target in tqdm(train_data):
         targets.append(torch.argmax(target, dim=-1))

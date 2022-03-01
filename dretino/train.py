@@ -5,7 +5,7 @@ import albumentations as A
 import pandas as pd
 from albumentations.pytorch import ToTensorV2
 from dretino.dataloader.build_features import DRDataModule
-from dretino.models.predict_model import predict
+from dretino.models.predict_model import test
 from dretino.models.train_model import Model, train
 from dretino.visualization.visualize import show_images, cal_mean, plot_metrics
 from sklearn.model_selection import train_test_split
@@ -37,8 +37,8 @@ if __name__ == "__main__":
             # A.ColorJitter(p=0.3),
             # A.Affine(shear=30, rotate=0, p=0.2),
             A.Normalize(
-                mean=[0.4342, 0.2122, 0.0729],
-                std=[0.3104, 0.1672, 0.0880],
+                mean=(0.5237, 0.2542, 0.0853),
+                std =(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -49,8 +49,8 @@ if __name__ == "__main__":
         [
             A.Resize(height=224, width=224),
             A.Normalize(
-                mean=[0.4342, 0.2122, 0.0729],
-                std=[0.3104, 0.1672, 0.0880],
+                mean=(0.5237, 0.2542, 0.0853),
+                std =(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -61,8 +61,8 @@ if __name__ == "__main__":
         [
             A.Resize(height=224, width=224),
             A.Normalize(
-                mean=[0.4342, 0.2122, 0.0729],
-                std=[0.3104, 0.1672, 0.0880],
+                mean=(0.5237, 0.2542, 0.0853),
+                std =(0.2649, 0.1497, 0.0876),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -85,25 +85,30 @@ if __name__ == "__main__":
         num_layers=2,
         dropout=0.2,
         lr=3e-4,
-        loss='corn',
+        loss='ce',
         epochs=5,
         gpus=0,
-        project='DRD'
+        project='DRD',
+        additional_layers=False
     )
+
+    wab = False
+    fast_dev_run = True
+    overfit_batches = False
 
     wandb.login(key=os.getenv('WANDB'))
 
     file_name, trainer = train(Model, dm,
-                               wab=True,
-                               fast_dev_run=False,
-                               overfit_batches=True,
+                               wab=wab,
+                               fast_dev_run=fast_dev_run,
+                               overfit_batches=overfit_batches,
                                **args)
+    if not fast_dev_run:
+        plot_metrics('../reports/csv_logs/' + file_name)
 
-    plot_metrics('../reports/csv_logs/'+file_name)
-
-    predict(Model, dm,
-            file_name,
-            trainer,
-            wab=True,
-            fast_dev_run=False,
-            overfit_batches=True)
+        test(Model, dm,
+             file_name,
+             trainer,
+             wab=wab,
+             fast_dev_run=fast_dev_run,
+             overfit_batches=overfit_batches)

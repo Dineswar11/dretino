@@ -9,6 +9,13 @@ from tqdm import tqdm
 
 
 def show_grid(image, title=None):
+    """Create a grid of images
+    Parameters
+    ----------
+    image : (np.array) Image
+    title : (str, optional) Title.
+    Defaults to None.
+    """
     image = image.permute(1, 2, 0)
 
     image = np.clip(image, 0, 1)
@@ -20,6 +27,12 @@ def show_grid(image, title=None):
 
 
 def show_images(dataloader):
+    """Show the image grid
+
+    Parameters
+    ----------
+    dataloader : (DataLoader) DataLoader to get the images from 
+    """
     class_labels = [0, 1, 2, 3, 4]
     data_iter = iter(dataloader)
     images, labels = data_iter.next()
@@ -32,6 +45,17 @@ def show_images(dataloader):
 
 
 def cal_mean(loader):
+    """Calculate Mean and Standard Deviation of the dataloader
+
+    Parameters
+    ----------
+    loader : (DataLoader) DataLoader
+
+    Returns
+    -------
+    mean : (long Tensor) Mean of the dataset
+    std : (long Tensor) Std of the dataset
+    """
     mean, std, total_img_count = 0, 0, 0
 
     for data, _ in tqdm(loader):
@@ -49,6 +73,16 @@ def cal_mean(loader):
 
 
 def plot_metrics(file_name):
+    """Plot the metrics for a given run
+
+    Parameters
+    ----------
+    file_name : (str) Folder path of the run
+
+    Returns
+    -------
+    plots : (plt) Train loss,Val loss Train accuracy,Val accuracy
+    """
     for dirs, _, files in os.walk(file_name):
         for file in files:
             if file.endswith('.csv'):

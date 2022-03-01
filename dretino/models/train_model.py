@@ -18,15 +18,34 @@ class Model(pl.LightningModule):
     def __init__(self,
                  loss='ce',
                  model_name='resnet50d',
+                 additional_layers=True,
                  num_classes=5,
                  lr=3e-4,
                  num_neurons=512,
                  n_layers=2,
                  dropout_rate=0.2):
+        """Pytorch Lightning Module for Model
+
+        Parameters
+        ----------
+        loss : (str, optional): Loss function to use ['ce','mse','corn','coral']. Defaults to 'ce'.
+        model_name : (str, optional): Model name for timm. Defaults to 'resnet50d'.
+        additional_layers : (bool, optional) Add addtional layers Defaults to True
+        num_classes : (int, optional): Number of classes. Defaults to 5.
+        lr : (_type_, optional): Learning Rate. Defaults to 3e-4.
+        num_neurons : (int, optional): Num of Neurons in the first layer. Defaults to 512.
+        n_layers : (int, optional): Number of additional layers. Defaults to 2.
+        dropout_rate : (float, optional): Dropout Rate Defaults to 0.2.
+
+        Raises
+        ------
+        ValueError : Should be "ce", "mse", "corn" or "coral"
+        """
         super(Model, self).__init__()
         self.save_hyperparameters(ignore=['model'])
         self.loss = loss
         self.num_classes = num_classes
+        self.additional_layers = additional_layers
         self.lr = lr
         self.model_name = model_name
         self.n_layers = n_layers
@@ -38,29 +57,33 @@ class Model(pl.LightningModule):
         if self.loss == 'ce':
             self.model = ModelCE(self.model_name,
                                  self.num_classes,
+                                 self.additional_layers,
                                  self.num_neurons,
                                  self.n_layers,
                                  self.dropout_rate)
         elif self.loss == 'mse':
             self.model = ModelMSE(self.model_name,
                                   self.num_classes,
+                                  self.additional_layers,
                                   self.num_neurons,
                                   self.n_layers,
                                   self.dropout_rate)
         elif self.loss == 'corn':
             self.model = ModelCORN(self.model_name,
                                    self.num_classes,
+                                   self.additional_layers,
                                    self.num_neurons,
                                    self.n_layers,
                                    self.dropout_rate)
         elif self.loss == 'coral':
             self.model = ModelCORAL(self.model_name,
                                     self.num_classes,
+                                    self.additional_layers,
                                     self.num_neurons,
                                     self.n_layers,
                                     self.dropout_rate)
         else:
-            s = ('Invalid value for `reduction`. Should be "ce", '
+            s = ('Invalid value for `loss`. Should be "ce", '
                  '"mse", "corn" or "coral". Got %s' % self.loss)
             raise ValueError(s)
 
@@ -106,7 +129,7 @@ class Model(pl.LightningModule):
         elif self.loss == 'coral':
             loss, preds, y = cal_coral_loss(logits, y, self.num_classes)
         else:
-            s = ('Invalid value for `reduction`. Should be "ce", '
+            s = ('Invalid value for `loss`. Should be "ce", '
                  '"mse", "corn" or "coral". Got %s' % self.loss)
             raise ValueError(s)
 
@@ -117,6 +140,21 @@ class Model(pl.LightningModule):
 
 
 def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwargs):
+    """Create a trainer to save tensorboard/wandb/csv_logger checkpoints.
+
+    Parameters
+    ----------
+    Model : (LightningModule), Model
+    dm : (LightningDataModule), DataModule 
+    wab : (bool, optional), Wandb integration. Defaults to False.
+    fast_dev_run : (bool, optional), Fast dev run for unit test of the model code. Defaults to False.
+    overfit_batches : (bool, optional), Used to overfit batches for sanity check. Defaults to False.
+
+    Returns
+    -------
+    file_name : _str_, Filename created using datetime
+    trainer : _LightningTrainer_, Trainer used in training
+    """
     if wab and fast_dev_run:
         s = "Both wab and fast_dev_run cannot be true at the same time"
         raise RuntimeError(s)
@@ -129,16 +167,18 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
     lr = kwargs['lr']
     loss = kwargs['loss']
     model_name = kwargs['model_name']
+    additional_layers = kwargs['additional_layers']
 
     model = Model(model_name=model_name,
                   loss=loss,
+                  additional_layers=additional_layers,
                   num_neurons=num_neurons,
                   n_layers=num_layers,
                   dropout_rate=dropout,
                   lr=lr,
                   num_classes=5)
 
-    file_name = f"{str(datetime.now()).replace(' ','').replace(':','')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
+    file_name = f"{str(datetime.now()).replace(' ', '').replace(':', '')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
     csv_logger = CSVLogger(save_dir="../reports/csv_logs/", name=file_name)
     tensorboard_logger = TensorBoardLogger(save_dir="../reports/tensorboard_logs/", name=file_name)
     if wab:
