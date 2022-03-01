@@ -44,7 +44,7 @@ def show_images(dataloader):
     plt.show()
 
 
-def cal_mean(loader):
+def cal_mean(loader,len,size):
     """Calculate Mean and Standard Deviation of the dataloader
 
     Parameters
@@ -56,20 +56,19 @@ def cal_mean(loader):
     mean : (long Tensor) Mean of the dataset
     std : (long Tensor) Std of the dataset
     """
-    mean, std, total_img_count = 0, 0, 0
+    psum    = torch.tensor([0.0, 0.0, 0.0])
+    psum_sq = torch.tensor([0.0, 0.0, 0.0])
 
-    for data, _ in tqdm(loader):
-        img_count = data.size(0)
-        data = data.float()
-        data = data.view(img_count, data.size(1), -1)
-        mean += data.mean(2).sum(0)
-        std += data.std(2).sum(0)
-        total_img_count += img_count
+    for inputs,_ in tqdm(train_dataloader):
+        psum    += inputs.sum(axis=[0, 2, 3])
+        psum_sq += (inputs ** 2).sum(axis=[0, 2, 3])
 
-    mean /= total_img_count
-    std /= total_img_count
+    count = len*size*size
+    total_mean = psum / count
+    total_var  = (psum_sq / count) - (total_mean ** 2)
+    total_std  = torch.sqrt(total_var)
 
-    return mean, std
+    return total_mean, total_std
 
 
 def plot_metrics(file_name):

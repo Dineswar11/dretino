@@ -1,54 +1,52 @@
-DR Detection
-==============================
+# DRetino
 
-A short description of the project.
+<p align="center">
+    <img src="https://res.cloudinary.com/grohealth/image/upload/$wpsize_!_cld_full!,w_1200,h_630,c_scale/v1588090981/Symptoms-of-Diabetic-Retinopathy.png">
+</p>
 
-Project Organization
-------------
+# DRetino 
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+A python library to create supervised diabetic retinopathy detection neural nets for ordinal regression using different loss functions.
+Dretino is build on pytorch lightning and contains four different losses CrossEntropy, MeanSquared, Coral, Corn
 
 
+
+- [Quick-start](#quick-start)
+
+
+
+
+## Quick-start
+
+* <a href="" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+
+* <a href=""><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open in Kaggle" /></a>
+
+
+```pycon
+from dretino.dataloader.build_features import DRDataModule
+from dretino.models.train_model import Model, train
+
+dm = DRDataModule(df_train, df_valid, df_test,
+                  train_path,
+                  valid_path,
+                  test_path,
+                  train_transforms,
+                  val_transforms,
+                  test_transforms,
+                  num_workers=4,
+                  batch_size=16)
+
+args = dict(
+        model_name='resnet50d',
+        lr=3e-4,
+        loss='mse',
+        epochs=50,
+        gpus=1,
+        project='project_name',
+        additional_layers=False
+    )
+
+train(Model,dm,**args)
+```
