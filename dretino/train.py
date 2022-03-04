@@ -16,10 +16,12 @@ if __name__ == "__main__":
     dotenv.load_dotenv(dotenv_path)
 
     PATH = '../data/processed/'
-    dfx = pd.read_csv(PATH + '2.Groundtruths/a.IDRiD_Disease_Grading_Training_Labels.csv')
-    df_test = pd.read_csv(PATH + '2.Groundtruths/b.IDRiD_Disease_Grading_Testing_Labels.csv')
+    dfx = pd.read_csv(PATH + '2.Groundtruths/a.IDRiD_Disease_Grading_Training_Labels.csv',
+                      usecols=['Image name', 'Retinopathy grade'])
+    df_test = pd.read_csv(PATH + '2.Groundtruths/b.IDRiD_Disease_Grading_Testing_Labels.csv',
+                          usecols=['Image name', 'Retinopathy grade'])
     df_train, df_valid = train_test_split(
-        dfx, test_size=0.1, random_state=42, stratify=dfx['Retinopathy grade'].values
+        dfx, test_size=0.2, random_state=42, stratify=dfx['Retinopathy grade'].values
     )
 
     df_train = df_train.reset_index(drop=True)
@@ -29,16 +31,16 @@ if __name__ == "__main__":
         [
             A.Resize(width=250, height=250),
             A.RandomCrop(height=224, width=224),
-            # A.HorizontalFlip(p=0.5),
-            # A.VerticalFlip(p=0.5),
-            # A.RandomRotate90(p=0.5),
-            # A.Blur(p=0.3),
-            # A.CLAHE(p=0.3),
-            # A.ColorJitter(p=0.3),
-            # A.Affine(shear=30, rotate=0, p=0.2),
+            A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
+            A.RandomRotate90(p=0.5),
+            A.Blur(p=0.15),
+            A.CLAHE(p=0.15),
+            A.ColorJitter(p=0.15),
+            A.Affine(shear=30, rotate=0, p=0.1),
             A.Normalize(
-                mean=(0.5237, 0.2542, 0.0853),
-                std=(0.2649, 0.1497, 0.0876),
+                mean=(0.5211, 0.2514, 0.0809),
+                std=(0.2653, 0.1499, 0.0861),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -49,8 +51,8 @@ if __name__ == "__main__":
         [
             A.Resize(height=224, width=224),
             A.Normalize(
-                mean=(0.5237, 0.2542, 0.0853),
-                std=(0.2649, 0.1497, 0.0876),
+                mean=(0.5211, 0.2514, 0.0809),
+                std=(0.2653, 0.1499, 0.0861),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -61,8 +63,8 @@ if __name__ == "__main__":
         [
             A.Resize(height=224, width=224),
             A.Normalize(
-                mean=(0.5237, 0.2542, 0.0853),
-                std=(0.2649, 0.1497, 0.0876),
+                mean=(0.5211, 0.2514, 0.0809),
+                std=(0.2653, 0.1499, 0.0861),
                 max_pixel_value=255.0,
             ),
             ToTensorV2(),
@@ -77,7 +79,7 @@ if __name__ == "__main__":
                       val_transforms=val_transforms,
                       test_transforms=test_transforms,
                       num_workers=4,
-                      batch_size=16)
+                      batch_size=4)
 
     args = dict(
         model_name='resnet50d',
@@ -86,17 +88,19 @@ if __name__ == "__main__":
         dropout=0.2,
         lr=3e-4,
         loss='mse',
-        epochs=5,
+        epochs=2,
         gpus=0,
         project='DRD',
-        additional_layers=False
+        additional_layers=False,
+        save_dir='reports'
     )
 
     wab = False
-    fast_dev_run = True
+    fast_dev_run = False
     overfit_batches = False
 
-    wandb.login(key=os.getenv('WANDB'))
+    if wab:
+        wandb.login(key=os.getenv('WANDB'))
 
     file_name, trainer = train(Model, dm,
                                wab=wab,
@@ -104,7 +108,7 @@ if __name__ == "__main__":
                                overfit_batches=overfit_batches,
                                **args)
     if not fast_dev_run:
-        plot_metrics('../reports/csv_logs/' + file_name)
+        plot_metrics(file_name)
 
         test(Model, dm,
              file_name,

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import pytorch_lightning as pl
@@ -168,6 +169,7 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
     loss = kwargs['loss']
     model_name = kwargs['model_name']
     additional_layers = kwargs['additional_layers']
+    save_dir = kwargs['save_dir']
 
     model = Model(model_name=model_name,
                   loss=loss,
@@ -179,19 +181,19 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                   num_classes=5)
 
     file_name = f"{str(datetime.now()).replace(' ', '').replace(':', '')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
-    csv_logger = CSVLogger(save_dir="../reports/csv_logs/", name=file_name)
-    tensorboard_logger = TensorBoardLogger(save_dir="../reports/tensorboard_logs/", name=file_name)
+    csv_logger = CSVLogger(save_dir=save_dir, name=file_name)
+    tensorboard_logger = TensorBoardLogger(save_dir=save_dir, name=file_name)
     if wab:
         wandb_logger = WandbLogger(project=kwargs['project'], log_model=False)
 
     checkpoint_callback = ModelCheckpoint(monitor='val_acc',
-                                          dirpath='../models',
+                                          dirpath=save_dir,
                                           save_top_k=1,
                                           save_last=False,
                                           save_weights_only=True,
                                           filename=file_name,
-                                          verbose=False,
-                                          mode='min')
+                                          verbose=True,
+                                          mode='max')
     trainer = Trainer(gpus=kwargs['gpus'],
                       max_epochs=kwargs['epochs'],
                       callbacks=[checkpoint_callback],
@@ -224,4 +226,4 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                   wandb_logger])
 
     trainer.fit(model, dm)
-    return file_name, trainer
+    return os.path.join(save_dir,file_name), trainer
