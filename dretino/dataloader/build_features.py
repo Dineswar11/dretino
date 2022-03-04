@@ -34,7 +34,7 @@ def create_dataloader(df_train, df_valid, df_test,
     train_data = CustomDataset(df_train,
                                train_path,
                                transform=A.Compose([
-                                   A.Resize(width=224, height=224),
+                                   A.Resize(width=1, height=1),
                                    ToTensorV2()
                                ]))
 
@@ -90,10 +90,10 @@ class DRDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(self.train_data,
-                          batch_size=self.batch_size,
-                          sampler=self.sampler,
-                          num_workers=self.num_workers,
-                          shuffle=False)
+                              batch_size=self.batch_size,
+                              sampler=self.sampler,
+                              num_workers=self.num_workers,
+                              shuffle=False)
 
     def val_dataloader(self):
         return DataLoader(self.val_data,

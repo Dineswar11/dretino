@@ -27,6 +27,3 @@ def test(Model, dm, file_name, trainer, wab=False, fast_dev_run=False, overfit_b
     else:
         model = Model.load_from_checkpoint(file_name + '.ckpt')
         trainer.test(model, dm)
-
-        if wab:
-            wandb.finish()

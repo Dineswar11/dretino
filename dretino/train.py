@@ -7,6 +7,7 @@ from albumentations.pytorch import ToTensorV2
 from dretino.dataloader.build_features import DRDataModule
 from dretino.models.predict_model import test
 from dretino.models.train_model import Model, train
+from dretino.models.get_preds import create_preds_data_loader, get_perds
 from dretino.visualization.visualize import show_images, cal_mean, plot_metrics
 from sklearn.model_selection import train_test_split
 
@@ -116,3 +117,12 @@ if __name__ == "__main__":
              wab=wab,
              fast_dev_run=fast_dev_run,
              overfit_batches=overfit_batches)
+
+        train_dataloader, val_dataloader, test_dataloader = create_preds_data_loader(df_train, df_valid, df_test,
+                                                                                     train_path=PATH + 'images_resized',
+                                                                                     valid_path=PATH + 'images_resized',
+                                                                                     test_path=PATH + 'test_images_resized',
+                                                                                     transforms=test_transforms)
+        preds, y = get_perds(file_name, Model, val_dataloader,
+                             args['loss'], num_classes=5)
+        print(preds)
