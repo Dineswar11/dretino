@@ -14,7 +14,7 @@ from dretino.visualization.visualize import show_images, cal_mean, plot_metrics
 from sklearn.model_selection import train_test_split
 
 
-def helper(wab, fast_dev_run, overfit_batches, num_classes=5, **args):
+def helper(wab, fast_dev_run, overfit_batches, num_classes=5, IMG_PATH='../data/processed/', **args):
     file_name, trainer = train(Model, dm,
                                wab=wab,
                                fast_dev_run=fast_dev_run,
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         }
     }
 
-    sweep_id = wandb.sweep(sweep_config, project="DRD")
+    sweep_id = wandb.sweep(sweep_config, project="test_sweep")
 
 
     def sweep_iteration():

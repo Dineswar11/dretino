@@ -8,7 +8,7 @@ from dretino.models.cornloss import ModelCORN, cal_corn_loss
 from dretino.models.crossentropy import ModelCE, ce_loss
 from dretino.models.mseloss import ModelMSE, mse_loss
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, Callback
 from pytorch_lightning.loggers import CSVLogger, WandbLogger, TensorBoardLogger
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -195,6 +195,7 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                           verbose=True,
                                           mode='max')
     trainer = Trainer(gpus=kwargs['gpus'],
+                      tpu_cores=kwargs['tpus'],
                       max_epochs=kwargs['epochs'],
                       callbacks=[checkpoint_callback],
                       logger=[csv_logger,
@@ -202,6 +203,7 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
     if wab:
         wandb_logger.watch(model)
         trainer = Trainer(gpus=kwargs['gpus'],
+                          tpu_cores=kwargs['tpus'],
                           max_epochs=kwargs['epochs'],
                           callbacks=[checkpoint_callback],
                           logger=[csv_logger,
@@ -209,9 +211,11 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                   wandb_logger])
     if fast_dev_run:
         trainer = Trainer(gpus=kwargs['gpus'],
+                          tpu_cores=kwargs['tpus'],
                           fast_dev_run=fast_dev_run)
     if overfit_batches:
         trainer = Trainer(gpus=kwargs['gpus'],
+                          tpu_cores=kwargs['tpus'],
                           overfit_batches=1,
                           max_epochs=kwargs['epochs'],
                           callbacks=[checkpoint_callback],
@@ -219,6 +223,7 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                   tensorboard_logger])
     if wab and overfit_batches:
         trainer = Trainer(gpus=kwargs['gpus'],
+                          tpu_cores=kwargs['tpus'],
                           max_epochs=kwargs['epochs'],
                           callbacks=[checkpoint_callback],
                           logger=[csv_logger,
@@ -226,4 +231,4 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                   wandb_logger])
 
     trainer.fit(model, dm)
-    return os.path.join(save_dir,file_name), trainer
+    return os.path.join(save_dir, file_name), trainer
