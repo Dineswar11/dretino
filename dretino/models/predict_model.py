@@ -1,8 +1,3 @@
-import os
-
-import wandb
-
-
 def test(Model, dm, file_name, trainer, wab=False, fast_dev_run=False, overfit_batches=False):
     """Testing on the test dataset
 

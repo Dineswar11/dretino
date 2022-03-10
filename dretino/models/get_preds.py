@@ -57,10 +57,11 @@ def get_perds(path, Model, dataloader, loss_fn, num_classes):
     loss_fn : str, loss function used
     num_classes = int, number of classes
     """
-    model = Model.load_from_checkpoint(path+'.ckpt')
+    model = Model.load_from_checkpoint(path + '.ckpt')
     cmat = ConfusionMatrix(num_classes=num_classes)
     preds_list = []
     y_list = []
+    logits_list = []
     model.eval()
     for x, y in tqdm(dataloader):
         with torch.no_grad():
@@ -77,8 +78,9 @@ def get_perds(path, Model, dataloader, loss_fn, num_classes):
             s = ('Invalid value for `loss`. Should be "ce",\
                  "mse", "corn" or "coral". Got %s' % loss_fn)
             raise ValueError(s)
-        cmat(preds,y)
+        cmat(preds, y)
         preds_list.append(preds.numpy())
         y_list.append(y.numpy())
+        logits_list.append(logits.numpy())
 
-    return np.array(preds_list).ravel(), np.array(y_list).ravel() , cmat.compute().numpy()
+    return np.squeeze(torch.nn.Softmax(dim=-1)(torch.tensor(logits)).numpy(), axis=1), np.array(y_list).ravel(), cmat.compute().numpy()

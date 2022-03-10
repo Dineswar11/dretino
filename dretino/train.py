@@ -39,8 +39,11 @@ def helper(wab, fast_dev_run, overfit_batches, num_classes=5, IMG_PATH='../data/
                                                                                      test_path=IMG_PATH + 'test_images_resized',
                                                                                      transforms=test_transforms)
 
-        preds, y, cfn_mtx = get_perds(file_name, Model, test_dataloader,
-                                      args['loss'], num_classes=5)
+        logits_test, y_test, cfn_mtx_test = get_perds(file_name, Model, test_dataloader,
+                                              args['loss'], num_classes=5)
+
+        logits_val, y_val, cfn_mtx_val = get_perds(file_name,Model,val_dataloader,
+                                           args['loss'],num_classes=5)
 
         #         wandb.sklearn.plot_confusion_matrix(y, preds, labels=['0','1','2','3','4'])
 
@@ -49,7 +52,63 @@ def helper(wab, fast_dev_run, overfit_batches, num_classes=5, IMG_PATH='../data/
 
         # plt.show()
 
-        return preds, y, cfn_mtx
+        return logits_test, logits_val, y_test, y_val,
+
+
+def sweep():
+    sweep_config = {
+        "name": "HyperParameterSearch",
+        "method": "random",  # Random search
+        "metric": {  # We want to maximize val_accuracy
+            "name": "test_accuracy",
+            "goal": "maximize"
+        },
+        "parameters": {
+            "num_neurons": {
+                # Choose from pre-defined values
+                "values": [512, 1024, 2048, 4096, 8192]
+            },
+            "num_layers": {
+                # Choose from pre-defined values
+                "values": [2, 3, 4, 5, 6]
+            },
+            "dropout": {
+                "values": [0.2, 0.3, 0.4, 0.5]
+            },
+            "lr": {
+                # log uniform distribution between exp(min) and exp(max)
+                "distribution": "log_uniform",
+                "min": -9.21,  # exp(-9.21) = 1e-4
+                "max": -6.90  # exp(-6.90) = 1e-3
+            },
+            "loss": {
+                "values": ['ce', 'corn']
+            }
+        }
+    }
+
+    sweep_id = wandb.sweep(sweep_config, project="test_sweep")
+
+    def sweep_iteration():
+        # set up W&B logger
+        wandb.init()  # required to have access to `wandb.config`
+        args = dict(
+            model_name='resnet50d',
+            num_neurons=wandb.config.num_neurons,
+            num_layers=wandb.config.num_layers,
+            dropout=wandb.config.dropout,
+            lr=wandb.config.lr,
+            loss=wandb.config.loss,
+            epochs=1,
+            gpus=0,
+            project='DRD',
+            additional_layers=True,
+            save_dir='reports'
+        )
+
+        logits, preds, y, cfn = helper(wab, fast_dev_run, overfit_batches, num_classes=5, **args)
+
+    wandb.agent(sweep_id, function=sweep_iteration, count=3)
 
 
 if __name__ == "__main__":
@@ -123,64 +182,28 @@ if __name__ == "__main__":
                       num_workers=4,
                       batch_size=4)
 
-    wab = True
+    wab = False
     fast_dev_run = False
     overfit_batches = False
 
     if wab:
         wandb.login(key=os.getenv('WANDB'))
 
-    sweep_config = {
-        "name": "HyperParameterSearch",
-        "method": "random",  # Random search
-        "metric": {  # We want to maximize val_accuracy
-            "name": "test_accuracy",
-            "goal": "maximize"
-        },
-        "parameters": {
-            "num_neurons": {
-                # Choose from pre-defined values
-                "values": [512, 1024, 2048, 4096, 8192]
-            },
-            "num_layers": {
-                # Choose from pre-defined values
-                "values": [2, 3, 4, 5, 6]
-            },
-            "dropout": {
-                "values": [0.2, 0.3, 0.4, 0.5]
-            },
-            "lr": {
-                # log uniform distribution between exp(min) and exp(max)
-                "distribution": "log_uniform",
-                "min": -9.21,  # exp(-9.21) = 1e-4
-                "max": -6.90  # exp(-6.90) = 1e-3
-            },
-            "loss": {
-                "values": ['ce', 'corn']
-            }
-        }
-    }
+    args = dict(
+        model_name='resnet50d',
+        num_neurons=512,
+        num_layers=2,
+        dropout=0.2,
+        lr=3e-4,
+        loss='ce',
+        epochs=1,
+        gpus=0,
+        tpus=None,
+        project='DRD',
+        additional_layers=False,
+        save_dir='reports'
+    )
 
-    sweep_id = wandb.sweep(sweep_config, project="test_sweep")
+    logits_test, logits_val, y_test, y_val = helper(wab, fast_dev_run, overfit_batches, num_classes=5, **args)
 
 
-    def sweep_iteration():
-        # set up W&B logger
-        wandb.init()  # required to have access to `wandb.config`
-        args = dict(
-            model_name='resnet50d',
-            num_neurons=wandb.config.num_neurons,
-            num_layers=wandb.config.num_layers,
-            dropout=wandb.config.dropout,
-            lr=wandb.config.lr,
-            loss=wandb.config.loss,
-            epochs=1,
-            gpus=0,
-            project='DRD',
-            additional_layers=True,
-            save_dir='reports'
-        )
-
-        preds, y, cfn = helper(wab, fast_dev_run, overfit_batches, num_classes=5, **args)
-
-    wandb.agent(sweep_id,function=sweep_iteration,count=3)
