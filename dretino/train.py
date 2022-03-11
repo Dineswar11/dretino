@@ -206,4 +206,4 @@ if __name__ == "__main__":
 
     logits_test, logits_val, y_test, y_val = helper(wab, fast_dev_run, overfit_batches, num_classes=5, **args)
 
-
+    print(logits_test)

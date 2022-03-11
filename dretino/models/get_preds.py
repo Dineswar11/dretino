@@ -83,4 +83,4 @@ def get_perds(path, Model, dataloader, loss_fn, num_classes):
         y_list.append(y.numpy())
         logits_list.append(logits.numpy())
 
-    return np.squeeze(torch.nn.Softmax(dim=-1)(torch.tensor(logits)).numpy(), axis=1), np.array(y_list).ravel(), cmat.compute().numpy()
+    return np.squeeze(torch.nn.Softmax(dim=-1)(torch.tensor(logits_list)).numpy(), axis=1), np.array(y_list).ravel(), cmat.compute().numpy()
