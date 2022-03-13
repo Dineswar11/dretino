@@ -196,7 +196,7 @@ if __name__ == "__main__":
         dropout=0.2,
         lr=3e-4,
         loss='ce',
-        epochs=1,
+        epochs=3,
         gpus=0,
         tpus=None,
         project='DRD',

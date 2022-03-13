@@ -28,7 +28,8 @@ class ModelMSE(nn.Module):
 
             for i in range(1, n_layers):
                 modules.append(nn.Linear(in_features=self.num_neurons, out_features=int(self.num_neurons / 2)))
-                modules.append(nn.ReLU())
+                modules.append(nn.ReLU()),
+                modules.append(nn.BatchNorm1d(int(self.num_neurons/2)))
                 modules.append(nn.Dropout(self.dropout_rate))
                 self.num_neurons = int(self.num_neurons / 2)
             modules.append(nn.Linear(in_features=self.num_neurons, out_features=1))

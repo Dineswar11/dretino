@@ -11,7 +11,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback
 from pytorch_lightning.loggers import CSVLogger, WandbLogger, TensorBoardLogger
 from torch.optim import Adam
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics import Accuracy, F1Score, CohenKappa
 
 
@@ -24,7 +24,8 @@ class Model(pl.LightningModule):
                  lr=3e-4,
                  num_neurons=512,
                  n_layers=2,
-                 dropout_rate=0.2):
+                 dropout_rate=0.2,
+                 max_epochs=40):
         """Pytorch Lightning Module for Model
 
         Parameters
@@ -45,6 +46,7 @@ class Model(pl.LightningModule):
         super(Model, self).__init__()
         self.save_hyperparameters(ignore=['model'])
         self.loss = loss
+        self.max_epochs = max_epochs
         self.num_classes = num_classes
         self.additional_layers = additional_layers
         self.lr = lr
@@ -114,9 +116,9 @@ class Model(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = Adam(self.model.parameters(), lr=self.lr)
-        scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=5, verbose=True)
+        scheduler = CosineAnnealingLR(optimizer, T_max=self.max_epochs, eta_min=self.lr/50)
 
-        return {'optimizer': optimizer}
+        return [optimizer], [scheduler]
 
     def _get_preds_loss_accuracy(self, batch):
         x, y = batch
@@ -178,7 +180,8 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                   n_layers=num_layers,
                   dropout_rate=dropout,
                   lr=lr,
-                  num_classes=5)
+                  num_classes=5,
+                  max_epochs=kwargs['epochs'])
 
     file_name = f"{str(datetime.now()).replace(' ', '').replace(':', '')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
     csv_logger = CSVLogger(save_dir=save_dir, name=file_name)
