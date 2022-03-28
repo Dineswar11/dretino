@@ -14,17 +14,21 @@ from dretino.models.mseloss import mse_loss
 
 def create_preds_data_loader(df_train, df_valid, df_test,
                              train_path, valid_path, test_path,
+                             train_file_ext,val_file_ext,test_file_ext,
                              transforms):
     train_data = CustomDataset(df_train,
                                train_path,
+                               train_file_ext,
                                transform=transforms)
 
     val_data = CustomDataset(df_valid,
                              valid_path,
+                             val_file_ext,
                              transform=transforms)
 
     test_data = CustomDataset(df_test,
                               test_path,
+                              test_file_ext,
                               transform=transforms)
 
     train_dataloader = DataLoader(train_data,
