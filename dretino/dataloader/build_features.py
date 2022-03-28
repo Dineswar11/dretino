@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 
 def create_dataloader(df_train, df_valid, df_test,
                       train_path, valid_path, test_path,
+                      train_file_ext,val_file_ext,test_file_ext,
                       train_transforms, val_transforms, test_transforms):
     """Create Dataloaders
 
@@ -33,6 +34,7 @@ def create_dataloader(df_train, df_valid, df_test,
     """
     train_data = CustomDataset(df_train,
                                train_path,
+                               train_file_ext,
                                transform=A.Compose([
                                    A.Resize(width=1, height=1),
                                    ToTensorV2()
@@ -40,10 +42,12 @@ def create_dataloader(df_train, df_valid, df_test,
 
     val_data = CustomDataset(df_valid,
                              valid_path,
+                             val_file_ext,
                              transform=val_transforms)
 
     test_data = CustomDataset(df_test,
                               test_path,
+                              test_file_ext,
                               transform=test_transforms)
 
     sampler = get_sampler(train_data)
@@ -55,6 +59,7 @@ class DRDataModule(pl.LightningDataModule):
 
     def __init__(self, df_train, df_valid, df_test,
                  train_path, valid_path, test_path,
+                 train_file_ext,val_file_ext,test_file_ext,
                  train_transforms, val_transforms, test_transforms,
                  num_workers=2,
                  batch_size=32):
@@ -81,19 +86,21 @@ class DRDataModule(pl.LightningDataModule):
         self.train_data, self.val_data, self.test_data, self.sampler = create_dataloader(
             df_train, df_valid, df_test,
             train_path, valid_path, test_path,
+            train_file_ext,val_file_ext,test_file_ext,
             train_transforms, val_transforms, test_transforms
         )
 
         self.train_data = CustomDataset(df_train,
                                         train_path,
+                                        train_file_ext,
                                         transform=self.train_transforms)
 
     def train_dataloader(self):
         return DataLoader(self.train_data,
-                              batch_size=self.batch_size,
-                              sampler=self.sampler,
-                              num_workers=self.num_workers,
-                              shuffle=False)
+                          batch_size=self.batch_size,
+                          sampler=self.sampler,
+                          num_workers=self.num_workers,
+                          shuffle=False)
 
     def val_dataloader(self):
         return DataLoader(self.val_data,

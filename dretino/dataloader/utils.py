@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 
 class CustomDataset(Dataset):
-    def __init__(self, dfx, image_dir, transform=None):
-        """Create a pytorch dataser
+    def __init__(self, dfx, image_dir, file_ext, transform=None):
+        """Create a pytorch dataset
 
         Parameters
         ----------
@@ -27,6 +27,7 @@ class CustomDataset(Dataset):
         self.num_classes = self.dfx.iloc[:,1].nunique()
         self.image_dir = image_dir
         self.transform = transform
+        self.file_ext = file_ext
 
     def __len__(self):
         return self.image_ids.shape[0]
@@ -36,7 +37,7 @@ class CustomDataset(Dataset):
         index = torch.tensor(self.targets[idx])
         target = F.one_hot(index, num_classes=self.num_classes)
 
-        img = np.array(Image.open(os.path.join(self.image_dir, img_name + '.jpg')).convert("RGB"))
+        img = np.array(Image.open(os.path.join(self.image_dir, img_name + self.file_ext)).convert("RGB"))
         if self.transform:
             img = self.transform(image=img)['image']
         return img, target

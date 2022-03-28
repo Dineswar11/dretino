@@ -87,3 +87,8 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+#checkpoint
+*.ckpt
+*.bin
+*.onix
