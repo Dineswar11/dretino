@@ -18,8 +18,7 @@ from torchmetrics import Accuracy, F1Score, CohenKappa
 class Model(pl.LightningModule):
     def __init__(self,
                  loss='ce',
-                 model_name='resnet50d',
-                 transformer=False,
+                 model_name='resnet50',
                  additional_layers=True,
                  num_classes=5,
                  lr=3e-4,
@@ -51,7 +50,6 @@ class Model(pl.LightningModule):
         self.num_classes = num_classes
         self.additional_layers = additional_layers
         self.lr = lr
-        self.transformer = transformer
         self.model_name = model_name
         self.n_layers = n_layers
         self.num_neurons = num_neurons
@@ -62,7 +60,6 @@ class Model(pl.LightningModule):
         if self.loss == 'ce':
             self.model = ModelCE(self.model_name,
                                  self.num_classes,
-                                 self.transformer,
                                  self.additional_layers,
                                  self.num_neurons,
                                  self.n_layers,
@@ -77,7 +74,6 @@ class Model(pl.LightningModule):
         elif self.loss == 'corn':
             self.model = ModelCORN(self.model_name,
                                     self.num_classes,
-                                    self.transformer,
                                     self.additional_layers,
                                     self.num_neurons,
                                     self.n_layers,
@@ -179,7 +175,6 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
 
     model = Model(model_name=model_name,
                   loss=loss,
-                  transformer=kwargs['transformer'],
                   additional_layers=additional_layers,
                   num_neurons=num_neurons,
                   n_layers=num_layers,
