@@ -197,41 +197,84 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
                                           filename=file_name,
                                           verbose=True,
                                           mode='max')
-    trainer = Trainer(gpus=kwargs['gpus'],
-                      tpu_cores=kwargs['tpus'],
-                      max_epochs=kwargs['epochs'],
-                      callbacks=[checkpoint_callback],
-                      logger=[csv_logger,
-                              tensorboard_logger])
-    if wab:
-        wandb_logger.watch(model)
+
+    if kwargs['gpus'] == 1:
         trainer = Trainer(gpus=kwargs['gpus'],
-                          tpu_cores=kwargs['tpus'],
-                          max_epochs=kwargs['epochs'],
-                          callbacks=[checkpoint_callback],
-                          logger=[csv_logger,
-                                  tensorboard_logger,
-                                  wandb_logger])
-    if fast_dev_run:
+                        tpu_cores=kwargs['tpus'],
+                        max_epochs=kwargs['epochs'],
+                        callbacks=[checkpoint_callback],
+                        logger=[csv_logger,
+                                tensorboard_logger])
+        if wab:
+            wandb_logger.watch(model)
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            tpu_cores=kwargs['tpus'],
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger,
+                                    wandb_logger])
+        if fast_dev_run:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            tpu_cores=kwargs['tpus'],
+                            fast_dev_run=fast_dev_run)
+        if overfit_batches:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            tpu_cores=kwargs['tpus'],
+                            overfit_batches=1,
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger])
+        if wab and overfit_batches:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            tpu_cores=kwargs['tpus'],
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger,
+                                    wandb_logger])
+    else:
         trainer = Trainer(gpus=kwargs['gpus'],
-                          tpu_cores=kwargs['tpus'],
-                          fast_dev_run=fast_dev_run)
-    if overfit_batches:
-        trainer = Trainer(gpus=kwargs['gpus'],
-                          tpu_cores=kwargs['tpus'],
-                          overfit_batches=1,
-                          max_epochs=kwargs['epochs'],
-                          callbacks=[checkpoint_callback],
-                          logger=[csv_logger,
-                                  tensorboard_logger])
-    if wab and overfit_batches:
-        trainer = Trainer(gpus=kwargs['gpus'],
-                          tpu_cores=kwargs['tpus'],
-                          max_epochs=kwargs['epochs'],
-                          callbacks=[checkpoint_callback],
-                          logger=[csv_logger,
-                                  tensorboard_logger,
-                                  wandb_logger])
+                        accelerator='ddp',
+                        tpu_cores=kwargs['tpus'],
+                        max_epochs=kwargs['epochs'],
+                        callbacks=[checkpoint_callback],
+                        logger=[csv_logger,
+                                tensorboard_logger])
+        if wab:
+            wandb_logger.watch(model)
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            accelerator='ddp',
+                            tpu_cores=kwargs['tpus'],
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger,
+                                    wandb_logger])
+        if fast_dev_run:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            accelerator='ddp',
+                            tpu_cores=kwargs['tpus'],
+                            fast_dev_run=fast_dev_run)
+        if overfit_batches:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            accelerator='ddp',
+                            tpu_cores=kwargs['tpus'],
+                            overfit_batches=1,
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger])
+        if wab and overfit_batches:
+            trainer = Trainer(gpus=kwargs['gpus'],
+                            tpu_cores=kwargs['tpus'],
+                            max_epochs=kwargs['epochs'],
+                            callbacks=[checkpoint_callback],
+                            logger=[csv_logger,
+                                    tensorboard_logger,
+                                    wandb_logger])
+
 
     trainer.fit(model, dm)
     return os.path.join(save_dir, file_name), trainer
