@@ -22,9 +22,9 @@ class CustomDataset(Dataset):
         """
         super().__init__()
         self.dfx = dfx
-        self.image_ids = self.dfx.iloc[:,0].values
-        self.targets = self.dfx.iloc[:,1].values
-        self.num_classes = self.dfx.iloc[:,1].nunique()
+        self.image_ids = self.dfx.iloc[:, 0].values
+        self.targets = self.dfx.iloc[:, 1].values
+        self.num_classes = self.dfx.iloc[:, 1].nunique()
         self.image_dir = image_dir
         self.transform = transform
         self.file_ext = file_ext
@@ -37,9 +37,13 @@ class CustomDataset(Dataset):
         index = torch.tensor(self.targets[idx])
         target = F.one_hot(index, num_classes=self.num_classes)
 
-        img = np.array(Image.open(os.path.join(self.image_dir, img_name + self.file_ext)).convert("RGB"))
+        img = np.array(
+            Image.open(os.path.join(self.image_dir, img_name + self.file_ext)).convert(
+                "RGB"
+            )
+        )
         if self.transform:
-            img = self.transform(image=img)['image']
+            img = self.transform(image=img)["image"]
         return img, target
 
 
@@ -52,7 +56,7 @@ def get_sampler(train_data):
 
     Returns
     -------
-    WeightedRandomSampler : Sampler 
+    WeightedRandomSampler : Sampler
     """
     targets = []
     for _, target in tqdm(train_data):
@@ -62,7 +66,7 @@ def get_sampler(train_data):
     class_sample_count = torch.tensor(
         [(targets == t).sum() for t in torch.unique(targets, sorted=True)]
     )
-    weight = 1. / class_sample_count.float()
+    weight = 1.0 / class_sample_count.float()
     sample_weight = torch.tensor([weight[t] for t in targets])
     sampler = WeightedRandomSampler(sample_weight, len(sample_weight))
 

@@ -1,4 +1,6 @@
-def test(Model, dm, file_name, trainer, wab=False, fast_dev_run=False, overfit_batches=False):
+def test(
+    Model, dm, file_name, trainer, wab=False, fast_dev_run=False, overfit_batches=False
+):
     """Testing on the test dataset
 
     Parametres
@@ -20,5 +22,5 @@ def test(Model, dm, file_name, trainer, wab=False, fast_dev_run=False, overfit_b
     elif overfit_batches:
         return
     else:
-        model = Model.load_from_checkpoint(file_name + '.ckpt')
+        model = Model.load_from_checkpoint(file_name + ".ckpt")
         trainer.test(model, dm)

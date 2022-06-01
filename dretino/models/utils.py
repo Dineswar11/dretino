@@ -24,9 +24,10 @@ def label_to_levels(label, num_classes, dtype=torch.float32):
         by the `dtype` parameter.
     """
     if not label <= num_classes - 1:
-        raise ValueError('Class label must be smaller or '
-                         'equal to %d (num_classes-1). Got %d.'
-                         % (num_classes - 1, label))
+        raise ValueError(
+            "Class label must be smaller or "
+            "equal to %d (num_classes-1). Got %d." % (num_classes - 1, label)
+        )
     if isinstance(label, torch.Tensor):
         int_label = label.item()
     else:
@@ -65,7 +66,8 @@ def levels_from_labelbatch(labels, num_classes, dtype=torch.float32):
     levels = []
     for label in labels:
         levels_from_label = label_to_levels(
-            label=label, num_classes=num_classes, dtype=dtype)
+            label=label, num_classes=num_classes, dtype=dtype
+        )
         levels.append(levels_from_label)
 
     levels = torch.stack(levels)
@@ -94,7 +96,7 @@ def proba_to_label(probas):
     return predicted_labels
 
 
-def coral_loss(logits, levels, importance_weights=None, reduction='mean'):
+def coral_loss(logits, levels, importance_weights=None, reduction="mean"):
     """Computes the CORAL loss described
     Parameters
     ----------
@@ -119,26 +121,31 @@ def coral_loss(logits, levels, importance_weights=None, reduction='mean'):
         or a loss value for each data record (if `reduction=None`).
     """
     if not logits.shape == levels.shape:
-        raise ValueError("Please ensure that logits (%s) has the same shape as levels (%s). "
-                         % (logits.shape, levels.shape))
+        raise ValueError(
+            "Please ensure that logits (%s) has the same shape as levels (%s). "
+            % (logits.shape, levels.shape)
+        )
 
-    term1 = (F.logsigmoid(logits) * levels
-             + (F.logsigmoid(logits) - logits) * (1 - levels))
+    term1 = F.logsigmoid(logits) * levels + (F.logsigmoid(logits) - logits) * (
+        1 - levels
+    )
 
     if importance_weights is not None:
         term1 *= importance_weights
 
-    val = (-torch.sum(term1, dim=1))
+    val = -torch.sum(term1, dim=1)
 
-    if reduction == 'mean':
+    if reduction == "mean":
         loss = torch.mean(val)
-    elif reduction == 'sum':
+    elif reduction == "sum":
         loss = torch.sum(val)
     elif reduction is None:
         loss = val
     else:
-        s = ('Invalid value for `reduction`. Should be "mean", '
-             '"sum", or None. Got %s' % reduction)
+        s = (
+            'Invalid value for `reduction`. Should be "mean", '
+            '"sum", or None. Got %s' % reduction
+        )
         raise ValueError(s)
 
     return loss
@@ -166,7 +173,7 @@ def corn_loss(logits, y, num_classes):
         sets.append((label_mask, label_tensor))
 
     num_examples = 0
-    losses = 0.
+    losses = 0.0
     for task_index, s in enumerate(sets):
         train_examples = s[0]
         train_labels = s[1]
@@ -177,8 +184,10 @@ def corn_loss(logits, y, num_classes):
         num_examples += len(train_labels)
         pred = logits[train_examples, task_index]
 
-        loss = -torch.sum(F.logsigmoid(pred) * train_labels
-                          + (F.logsigmoid(pred) - pred) * (1 - train_labels))
+        loss = -torch.sum(
+            F.logsigmoid(pred) * train_labels
+            + (F.logsigmoid(pred) - pred) * (1 - train_labels)
+        )
         losses += loss
 
     return losses / num_classes
@@ -213,7 +222,7 @@ def corn_labels_from_logits(logits):
 
 
 class CoralLayer(nn.Module):
-    """ Implements CORAL layer
+    """Implements CORAL layer
     Parameters
     -----------
     size_in : int
@@ -227,6 +236,7 @@ class CoralLayer(nn.Module):
         initialization scheme results in faster learning and better
         generalization performance in practice.
     """
+
     def __init__(self, size_in, num_classes, preinit_bias=True):
         super().__init__()
         self.size_in, self.size_out = size_in, 1
@@ -234,10 +244,10 @@ class CoralLayer(nn.Module):
         self.coral_weights = torch.nn.Linear(self.size_in, 1, bias=False)
         if preinit_bias:
             self.coral_bias = torch.nn.Parameter(
-                torch.arange(num_classes - 1, 0, -1).float() / (num_classes - 1))
+                torch.arange(num_classes - 1, 0, -1).float() / (num_classes - 1)
+            )
         else:
-            self.coral_bias = torch.nn.Parameter(
-                torch.zeros(num_classes - 1).float())
+            self.coral_bias = torch.nn.Parameter(torch.zeros(num_classes - 1).float())
 
     def forward(self, x):
         """

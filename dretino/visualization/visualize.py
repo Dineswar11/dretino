@@ -31,7 +31,7 @@ def show_images(dataloader):
 
     Parameters
     ----------
-    dataloader : (DataLoader) DataLoader to get the images from 
+    dataloader : (DataLoader) DataLoader to get the images from
     """
     class_labels = [0, 1, 2, 3, 4]
     data_iter = iter(dataloader)
@@ -40,11 +40,11 @@ def show_images(dataloader):
     out = make_grid(images, nrow=4)
 
     show_grid(out, title=[class_labels[torch.argmax(x, dim=-1)] for x in labels])
-    plt.axis('off')
+    plt.axis("off")
     plt.show()
 
 
-def cal_mean(loader,len,size):
+def cal_mean(loader, len, size):
     """Calculate Mean and Standard Deviation of the dataloader
 
     Parameters
@@ -56,17 +56,17 @@ def cal_mean(loader,len,size):
     mean : (long Tensor) Mean of the dataset
     std : (long Tensor) Std of the dataset
     """
-    psum    = torch.tensor([0.0, 0.0, 0.0])
+    psum = torch.tensor([0.0, 0.0, 0.0])
     psum_sq = torch.tensor([0.0, 0.0, 0.0])
 
-    for inputs,_ in tqdm(train_dataloader):
-        psum    += inputs.sum(axis=[0, 2, 3])
-        psum_sq += (inputs ** 2).sum(axis=[0, 2, 3])
+    for inputs, _ in tqdm(train_dataloader):
+        psum += inputs.sum(axis=[0, 2, 3])
+        psum_sq += (inputs**2).sum(axis=[0, 2, 3])
 
-    count = len*size*size
+    count = len * size * size
     total_mean = psum / count
-    total_var  = (psum_sq / count) - (total_mean ** 2)
-    total_std  = torch.sqrt(total_var)
+    total_var = (psum_sq / count) - (total_mean**2)
+    total_std = torch.sqrt(total_var)
 
     return total_mean, total_std
 
@@ -84,7 +84,7 @@ def plot_metrics(file_name):
     """
     for dirs, _, files in os.walk(file_name):
         for file in files:
-            if file.endswith('.csv'):
+            if file.endswith(".csv"):
                 path = os.path.join(dirs, file)
 
     metrics = pd.read_csv(path)
@@ -98,7 +98,9 @@ def plot_metrics(file_name):
 
     df_metrics = pd.DataFrame(aggreg_metrics)
     df_metrics[["train_loss_epoch", "val_loss"]].plot(
-        grid=True, legend=True, xlabel='Epoch', ylabel='Loss')
+        grid=True, legend=True, xlabel="Epoch", ylabel="Loss"
+    )
     df_metrics[["train_acc_epoch", "val_acc"]].plot(
-        grid=True, legend=True, xlabel='Epoch', ylabel='Accuracy')
+        grid=True, legend=True, xlabel="Epoch", ylabel="Accuracy"
+    )
     plt.show()

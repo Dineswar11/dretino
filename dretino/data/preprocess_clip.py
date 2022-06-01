@@ -27,7 +27,7 @@ def trim(im):
     cols = np.where(col_sums > img.shape[0] * percentage)[0]
     min_row, min_col = np.min(rows), np.min(cols)
     max_row, max_col = np.max(rows), np.max(cols)
-    im_crop = img[min_row: max_row + 1, min_col: max_col + 1]
+    im_crop = img[min_row : max_row + 1, min_col : max_col + 1]
     return Image.fromarray(im_crop)
 
 
