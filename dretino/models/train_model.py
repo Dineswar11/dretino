@@ -57,7 +57,7 @@ class Model(pl.LightningModule):
         self.num_neurons = num_neurons
         self.dropout_rate = dropout_rate
         self.accuracy = Accuracy()
-        self.metric = F1Score(num_classes=self.num_classes)
+        self.metric = F1Score(num_classes=self.num_classes, average='macro')
         self.kappametric = CohenKappa(num_classes=self.num_classes)
         if self.loss == "ce":
             self.model = ModelCE(
@@ -125,6 +125,7 @@ class Model(pl.LightningModule):
         self.log("test_loss", loss)
         self.log("test_accuracy", acc)
         self.log("test_F1_score", f1_score, prog_bar=True)
+        self.log("test_kappa", kappa_score, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = Adam(self.model.parameters(), lr=self.lr)
