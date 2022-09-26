@@ -50,3 +50,23 @@ args = dict(
 
 train(Model,dm,**args)
 ```
+
+## Results
+
+We performed the above shown techniques on 2 diabetic retinopathy datasets
+
+Aptos (contains 3k images)
+Eyepacs (contains 30k images)
+
+
+We first train the model with imagenet initialization on the datasets and then finetune to get the maximum accuracy for the given problem
+
+And comparing the accuracy to supervised techniques
+
+Using Eyepacs (30k images) also shows how easily it is scalable to more data
+
+### Aptos
+
+<div style="display:flex;justify-content:space-around">
+    ![Aptos LE]()
+</div>

@@ -59,7 +59,7 @@ def cal_mean(loader, len, size):
     psum = torch.tensor([0.0, 0.0, 0.0])
     psum_sq = torch.tensor([0.0, 0.0, 0.0])
 
-    for inputs, _ in tqdm(train_dataloader):
+    for inputs, _ in tqdm(loader):
         psum += inputs.sum(axis=[0, 2, 3])
         psum_sq += (inputs**2).sum(axis=[0, 2, 3])
 
