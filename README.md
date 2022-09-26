@@ -67,6 +67,22 @@ Using Eyepacs (30k images) also shows how easily it is scalable to more data
 
 ### Aptos
 
-<div style="display:flex;justify-content:space-around">
-    ![Aptos LE]()
+<div style="display:flex;justify-content:space-around;flex-flow: column">
+
+![Aptos LE](https://raw.githubusercontent.com/Dineswar11/dretino/master/reports/aptos_lineareval.png)
+
+![Aptos FT](https://raw.githubusercontent.com/Dineswar11/dretino/master/reports/aptos_finetune.png)
+</div>
+
+
+### Eyepacs
+
+<div style="display:flex;justify-content:space-around;flex-flow:column">
+
+
+![EyePacs LE](https://raw.githubusercontent.com/Dineswar11/dretino/master/reports/eyepacs_linear_eval.png)
+
+![EyePacs FT](https://raw.githubusercontent.com/Dineswar11/dretino/master/reports/eyepacs_finetune.png)
+
+
 </div>

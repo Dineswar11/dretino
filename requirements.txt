@@ -15,6 +15,7 @@ torch
 timm
 torchmetrics
 wandb
+lightly
 albumentations
 scikit-learn
 matplotlib
