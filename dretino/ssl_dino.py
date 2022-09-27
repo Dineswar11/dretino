@@ -22,7 +22,9 @@ class DINO(pl.LightningModule):
         input_dim = 2048
 
         self.student_backbone = backbone
-        self.student_head = DINOProjectionHead(input_dim, 512, 64, 2048, freeze_last_layer=1)
+        self.student_head = DINOProjectionHead(
+            input_dim, 512, 64, 2048, freeze_last_layer=1
+        )
         self.teacher_backbone = copy.deepcopy(backbone)
         self.teacher_head = DINOProjectionHead(input_dim, 512, 64, 2048)
         deactivate_requires_grad(self.teacher_backbone)
@@ -49,7 +51,7 @@ class DINO(pl.LightningModule):
         teacher_out = [self.forward_teacher(view) for view in global_views]
         student_out = [self.forward(view) for view in views]
         loss = self.criterion(teacher_out, student_out, epoch=self.current_epoch)
-        self.log('loss',loss,on_step=True,on_epoch=True)
+        self.log("loss", loss, on_step=True, on_epoch=True)
         return loss
 
     def on_after_backward(self):
@@ -75,18 +77,16 @@ dataloader = torch.utils.data.DataLoader(
     num_workers=8,
 )
 
-gpus = [0,1,2,3]
+gpus = [0, 1, 2, 3]
 
 wandb_logger = WandbLogger(project="ssl_aptos")
 
 trainer = pl.Trainer(
     max_epochs=250,
     gpus=gpus,
-    strategy='ddp',
+    strategy="ddp",
     sync_batchnorm=True,
     replace_sampler_ddp=True,
-    logger=wandb_logger
+    logger=wandb_logger,
 )
 trainer.fit(model=model, train_dataloaders=dataloader)
-
-

@@ -9,6 +9,7 @@ from lightly.data import SimCLRCollateFunction
 from lightly.loss import NTXentLoss
 from lightly.models.modules import SimCLRProjectionHead
 
+
 class SimCLR(pl.LightningModule):
     def __init__(self):
         super().__init__()
@@ -16,7 +17,7 @@ class SimCLR(pl.LightningModule):
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.projection_head = SimCLRProjectionHead(512, 2048, 2048)
 
-        # enable gather_distributed to gather features from all gpus
+        # enable gather_distributed to gather features from all gpus
         # before calculating the loss
         self.criterion = NTXentLoss(gather_distributed=True)
 
@@ -30,7 +31,7 @@ class SimCLR(pl.LightningModule):
         z0 = self.forward(x0)
         z1 = self.forward(x1)
         loss = self.criterion(z0, z1)
-        self.log('loss',loss,on_epoch=True,on_step=True)
+        self.log("loss", loss, on_epoch=True, on_step=True)
         return loss
 
     def configure_optimizers(self):
@@ -48,7 +49,7 @@ dataset = LightlyDataset(input_dir="../aptos/train_images_resize/")
 
 collate_fn = SimCLRCollateFunction(
     input_size=32,
-    gaussian_blur=0.,
+    gaussian_blur=0.0,
 )
 
 dataloader = torch.utils.data.DataLoader(
@@ -65,10 +66,6 @@ gpus = torch.cuda.device_count()
 # train with DDP and use Synchronized Batch Norm for a more accurate batch norm
 # calculation
 trainer = pl.Trainer(
-    max_epochs=250, 
-    gpus=gpus,
-    strategy='ddp',
-    sync_batchnorm=True,
-    loggers=wandb_logger
+    max_epochs=250, gpus=gpus, strategy="ddp", sync_batchnorm=True, loggers=wandb_logger
 )
 trainer.fit(model=model, train_dataloaders=dataloader)

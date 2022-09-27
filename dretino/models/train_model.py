@@ -202,7 +202,7 @@ def train(Model, dm, wab=False, fast_dev_run=False, overfit_batches=False, **kwa
         max_epochs=kwargs["epochs"],
     )
 
-    file_name = f"{str(datetime.now()).replace(' ', '').replace(':', '')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
+    file_name = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{loss}_{num_neurons}_{num_layers}_{dropout}_{lr}"
     csv_logger = CSVLogger(save_dir=save_dir, name=file_name)
     tensorboard_logger = TensorBoardLogger(save_dir=save_dir, name=file_name)
     if wab:

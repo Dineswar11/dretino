@@ -35,7 +35,7 @@ class SwaV(pl.LightningModule):
         high_resolution = multi_crop_features[:2]
         low_resolution = multi_crop_features[2:]
         loss = self.criterion(high_resolution, low_resolution)
-        self.log('loss',loss,on_epoch=True,on_step=True)
+        self.log("loss", loss, on_epoch=True, on_step=True)
         return loss
 
     def configure_optimizers(self):
@@ -60,13 +60,9 @@ dataloader = torch.utils.data.DataLoader(
     num_workers=8,
 )
 
-gpus = [4,5,6,7]
+gpus = [4, 5, 6, 7]
 
 trainer = pl.Trainer(
-    max_epochs=150, 
-    gpus=gpus,
-    strategy='ddp',
-    sync_batchnorm=True,
-    logger=wandb_logger
+    max_epochs=150, gpus=gpus, strategy="ddp", sync_batchnorm=True, logger=wandb_logger
 )
 trainer.fit(model=model, train_dataloaders=dataloader)
