@@ -1,3 +1,5 @@
+from dretino import config
+
 import copy
 
 import torch
@@ -15,9 +17,12 @@ from lightly.models.utils import update_momentum
 
 
 class DINO(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, pretrained):
         super().__init__()
-        resnet = torchvision.models.resnet50()
+        if pretrained == "supervised":
+            resnet = timm.create_model("resnet50", pretrained=True)
+        else:
+            resnet = torch.hub.load("facebookresearch/dino:main", "dino_resnet50")
         backbone = nn.Sequential(*list(resnet.children())[:-1])
         input_dim = 2048
 
@@ -74,7 +79,7 @@ dataloader = torch.utils.data.DataLoader(
     collate_fn=collate_fn,
     shuffle=True,
     drop_last=True,
-    num_workers=8,
+    num_workers=config.NUM_WORKERS,
 )
 
 gpus = [0, 1, 2, 3]

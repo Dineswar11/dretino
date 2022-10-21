@@ -1,3 +1,5 @@
+from dretino import config
+
 import torch
 from torch import nn
 import torchvision
@@ -12,10 +14,19 @@ from lightly.models.modules import SwaVPrototypes
 
 
 class SwaV(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, pretrained):
         super().__init__()
-        resnet = torchvision.models.resnet50()
-        self.backbone = nn.Sequential(*list(resnet.children())[:-1])
+        if pretrained == "supervised":
+            resnet = timm.create_model("resnet50", pretrained=True)
+            self.backbone = nn.Sequential(*list(resnet.children())[:-1])
+        else:
+            from pl_bolts.models.self_supervised import SwAV
+
+            weight_path = "https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/bolts_swav_imagenet/swav_imagenet.ckpt"
+            swav = SwAV.load_from_checkpoint(weight_path, strict=False)
+
+            resnet = swav.model
+            self.backbone = nn.Sequential(*list(resnet.children())[:-2])
         self.projection_head = SwaVProjectionHead(2048, 512, 128)
         self.prototypes = SwaVPrototypes(128, n_prototypes=512)
 
@@ -57,7 +68,7 @@ dataloader = torch.utils.data.DataLoader(
     collate_fn=collate_fn,
     shuffle=True,
     drop_last=True,
-    num_workers=8,
+    num_workers=config.NUM_WORKERS,
 )
 
 gpus = [4, 5, 6, 7]

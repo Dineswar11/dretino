@@ -92,3 +92,5 @@ target/
 *.ckpt
 *.bin
 *.onix
+
+~$*

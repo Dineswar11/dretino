@@ -57,7 +57,7 @@ class Model(pl.LightningModule):
         self.num_neurons = num_neurons
         self.dropout_rate = dropout_rate
         self.accuracy = Accuracy()
-        self.metric = F1Score(num_classes=self.num_classes, average='macro')
+        self.metric = F1Score(num_classes=self.num_classes, average="macro")
         self.kappametric = CohenKappa(num_classes=self.num_classes)
         if self.loss == "ce":
             self.model = ModelCE(

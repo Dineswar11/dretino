@@ -1,3 +1,5 @@
+from dretino import config
+
 import os
 import dotenv
 import wandb
@@ -208,7 +210,7 @@ if __name__ == "__main__":
         train_transforms=train_transforms,
         val_transforms=val_transforms,
         test_transforms=test_transforms,
-        num_workers=4,
+        num_workers=config.NUM_WORKERS,
         batch_size=4,
     )
 

@@ -1,3 +1,5 @@
+from dretino import config
+
 import timm
 import torch
 import torch.nn as nn
@@ -13,11 +15,11 @@ class ModelCORAL(nn.Module):
     def __init__(
         self,
         model_name,
-        num_classes=5,
-        additional_layers=True,
-        num_neurons=512,
-        n_layers=2,
-        dropout_rate=0.2,
+        num_classes=config.NUM_CLASSES,
+        additional_layers=config.ADDITIONAL_LAYERS,
+        num_neurons=config.NUM_NEURONS,
+        n_layers=config.N_LAYERS,
+        dropout_rate=config.DROPOUT_RATE,
     ):
         super().__init__()
         self.model_name = model_name

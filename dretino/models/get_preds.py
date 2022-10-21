@@ -1,3 +1,5 @@
+from dretino import config
+
 import torch
 import numpy as np
 
@@ -33,12 +35,16 @@ def create_preds_data_loader(
     test_data = CustomDataset(df_test, test_path, test_file_ext, transform=transforms)
 
     train_dataloader = DataLoader(
-        train_data, batch_size=1, num_workers=2, shuffle=False
+        train_data, batch_size=1, num_workers=config.NUM_WORKERS, shuffle=False
     )
 
-    val_dataloader = DataLoader(val_data, batch_size=1, num_workers=2, shuffle=False)
+    val_dataloader = DataLoader(
+        val_data, batch_size=1, num_workers=config.NUM_WORKERS, shuffle=False
+    )
 
-    test_dataloader = DataLoader(test_data, batch_size=1, num_workers=2, shuffle=False)
+    test_dataloader = DataLoader(
+        test_data, batch_size=1, num_workers=config.NUM_WORKERS, shuffle=False
+    )
 
     return train_dataloader, val_dataloader, test_dataloader
 

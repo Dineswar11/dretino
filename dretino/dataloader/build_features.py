@@ -4,6 +4,7 @@ from albumentations.pytorch import ToTensorV2
 from dretino.dataloader.utils import get_sampler, CustomDataset
 from torch.utils.data import DataLoader
 
+from dretino import config
 
 def create_dataloader(
     df_train,
@@ -75,7 +76,7 @@ class DRDataModule(pl.LightningDataModule):
         train_transforms,
         val_transforms,
         test_transforms,
-        num_workers=2,
+        num_workers=config.NUM_WORKERS,
         batch_size=32,
     ):
         """Pytorch Lightning Data Module
