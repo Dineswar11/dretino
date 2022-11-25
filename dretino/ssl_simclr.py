@@ -4,7 +4,6 @@ import torch
 from torch import nn
 import torchvision
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 
 from lightly.data import LightlyDataset
 from lightly.data import SimCLRCollateFunction
@@ -49,7 +48,6 @@ class SimCLR(pl.LightningModule):
         return optim
 
 
-wandb_logger = WandbLogger(project="ssl_aptos")
 
 model = SimCLR()
 
@@ -76,6 +74,6 @@ gpus = torch.cuda.device_count()
 # train with DDP and use Synchronized Batch Norm for a more accurate batch norm
 # calculation
 trainer = pl.Trainer(
-    max_epochs=250, gpus=gpus, strategy="ddp", sync_batchnorm=True, loggers=wandb_logger
+    max_epochs=250, gpus=gpus, strategy="ddp", sync_batchnorm=True
 )
 trainer.fit(model=model, train_dataloaders=dataloader)

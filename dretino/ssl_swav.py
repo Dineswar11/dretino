@@ -4,7 +4,6 @@ import torch
 from torch import nn
 import torchvision
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 
 from lightly.data import LightlyDataset
 from lightly.data import SwaVCollateFunction
@@ -54,8 +53,6 @@ class SwaV(pl.LightningModule):
         return optim
 
 
-wandb_logger = WandbLogger(project="ssl_aptos")
-
 model = SwaV()
 
 dataset = LightlyDataset(input_dir="../aptos/train_images_resize/")
@@ -74,6 +71,6 @@ dataloader = torch.utils.data.DataLoader(
 gpus = [4, 5, 6, 7]
 
 trainer = pl.Trainer(
-    max_epochs=150, gpus=gpus, strategy="ddp", sync_batchnorm=True, logger=wandb_logger
+    max_epochs=150, gpus=gpus, strategy="ddp", sync_batchnorm=True
 )
 trainer.fit(model=model, train_dataloaders=dataloader)

@@ -6,7 +6,6 @@ import torch
 from torch import nn
 import torchvision
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 
 from lightly.data import LightlyDataset
 from lightly.data import DINOCollateFunction
@@ -84,14 +83,12 @@ dataloader = torch.utils.data.DataLoader(
 
 gpus = [0, 1, 2, 3]
 
-wandb_logger = WandbLogger(project="ssl_aptos")
 
 trainer = pl.Trainer(
     max_epochs=250,
     gpus=gpus,
     strategy="ddp",
     sync_batchnorm=True,
-    replace_sampler_ddp=True,
-    logger=wandb_logger,
+    replace_sampler_ddp=True
 )
 trainer.fit(model=model, train_dataloaders=dataloader)
