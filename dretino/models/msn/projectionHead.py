@@ -15,11 +15,6 @@ class ProjectionHead(nn.Module):
         self.layers = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor):
-        """Computes one forward pass through the projection head.
-        Args:
-            x:
-                Input of shape bsz x num_ftrs.
-        """
         return self.layers(x)
 
 class MSNProjectionHead(ProjectionHead):

@@ -29,19 +29,6 @@ class MAEEncoder(vision_transformer.Encoder):
         input: torch.Tensor, 
         idx_keep: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Encode input tokens.
-
-        Args:
-            input:
-                Batch of token sequences.
-            idx_keep:
-                Tensor with shape (batch_size, num_tokens_to_keep) where each
-                entry is an index of the token to keep in the respective batch.
-                If specified, only the indexed tokens will be encoded.
-
-        Returns:
-            Batch of encoded output tokens.
-        """
         input = input + self.pos_embedding
         if idx_keep is not None:
             input = utils.get_at_index(input, idx_keep)
