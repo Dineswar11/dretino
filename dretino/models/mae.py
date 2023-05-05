@@ -15,7 +15,7 @@ class MAE(pl.LightningModule):
         super().__init__()
 
         decoder_dim = 512
-        vit = torchvision.models.vit_b_32(pretrained=False)
+        vit = torchvision.models.vit_b_16()
         self.mask_ratio = 0.75
         self.patch_size = vit.patch_size
         self.sequence_length = vit.seq_length
@@ -77,7 +77,7 @@ class MAE(pl.LightningModule):
 model = MAE()
 
 transform = MAETransform()
-dataset = LightlyDataset("path/to/folder", transform=transform)
+dataset = LightlyDataset("D:\DR Detection\data\processed\images_resized", transform=transform)
 
 collate_fn = MultiViewCollate()
 
@@ -91,10 +91,10 @@ dataloader = torch.utils.data.DataLoader(
 )
 
 trainer = pl.Trainer(
-    max_epochs=200,
+    max_epochs=1,
     devices="auto",
-    accelerator="gpu",
-    strategy="ddp",
-    use_distributed_sampler=True,
+    accelerator="cpu",
+    # strategy="ddp",
+    # use_distributed_sampler=True,
 )
 trainer.fit(model=model, train_dataloaders=dataloader)
